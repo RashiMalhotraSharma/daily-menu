@@ -2,18 +2,18 @@
 // You would manually populate this or use a script to convert your Excel to this format.
 const menuData = {
     breakfast: [
-        "Scrambled Eggs", "Dosa", "Pancakes", "Poha", "Seviyan", "Upma", "Guac/Cheese Toast"
+        "Scrambled Eggs", "Dosa", "Pancakes", "Poha", "Seviyan", "Upma", "Guac/Cheese Toast", "Idli", "Cheela", "Rava Idli", "Sooji Toast", "Pizza Bread"
     ],
     lunch: [
-        "Chicken Salad", "Turkey Sandwich", "Vegetable Soup", "Sushi", "Burger", "Quinoa Salad", "Steak and Potatoes", "Fish and Chips", "Pulled Pork Sandwich"
+        "Aloo matar", "Rajma", "White Chane", "Black Chane", "Burger", "Moong Dal", "Paneer Dish", "Shimla Mirch/Aloo", "Bharta" , "Sambhar Rice", "Dal Makhani", "Aloo Palak", "Aloo Gobi", "Egg Curry"
     ],
     dinner: [
-        "Pasta with Meatballs", "Roasted Chicken", "Salmon with Asparagus", "Pizza", "Tacos", "Stir-fry", "Lasagna", "Chili", "Enchiladas"
+        "Pasta", "Burger", "O Tacos", "Chowmein", "Repeat Lunch", "Order-In", "Chana Chaat", "Khichdi", "Pulao", "Jeera Aloo", "Tamarind Rice", "Pyaaz Tamatar", "Boondi sabzi"
     ],
     snack: [
-        "Apple Slices", "Yogurt Parfait", "Mixed Nuts", "Granola Bar", "Cheese and Crackers", "Hummus with Carrots", "Popcorn", "Orange", "Banana"
+        "Apple", "Mixed Nuts", "Snack Cucumbers", "Hummus with Carrots", "Popcorn", "Orange", "Banana"
     ],
     dessert: [
-        "Chocolate Cake", "Fruit Salad", "Ice Cream", "Brownie", "Cheesecake", "Tiramisu", "Apple Pie", "Cupcake", "Cookie"
+        "Ice Cream", "Cookie"
     ]
 };
