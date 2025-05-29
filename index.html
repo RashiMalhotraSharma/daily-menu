@@ -1,16 +1,25 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Menu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
     <style>
+        /* Define color variables for easy modification */
+        :root {
+            --deep-purple: #6A057F;
+            --medium-purple: #9A42BC;
+            --light-purple: #C18FD0;
+            --very-light-purple: #EEDDFC;
+            --darkest-purple: #4A005B;
+        }
+
         body {
-            font-family: 'Montserrat', sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
+            /* Use Dancing Script as the primary cursive font, with fallbacks */
+            font-family: 'Dancing Script', cursive, sans-serif;
+            background-color: var(--very-light-purple); /* Very light purple background */
+            color: var(--darkest-purple); /* Darkest purple for general text */
             margin: 0;
             padding: 20px;
             display: flex;
@@ -19,52 +28,59 @@
             min-height: 100vh;
         }
         .container {
-            background-color: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            padding: 30px 40px;
+            background-color: #ffffff; /* Keep container background white for contrast */
+            border-radius: 15px; /* Slightly more rounded corners */
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Softer, more prominent shadow */
+            padding: 35px 50px; /* More padding */
             width: 100%;
-            max-width: 600px;
+            max-width: 650px; /* Slightly wider container */
             box-sizing: border-box;
             text-align: center;
         }
         #date-day {
-            font-size: 2.2em;
+            font-family: 'Great Vibes', cursive, sans-serif; /* A more elegant cursive for the date */
+            font-size: 2.8em; /* Larger font size */
             font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #eee;
+            color: var(--deep-purple); /* Deep purple for the date */
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--light-purple); /* Light purple border */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05); /* Subtle text shadow */
         }
         .menu-section {
-            margin-bottom: 20px;
+            margin-bottom: 25px; /* More space between sections */
             text-align: left;
         }
         .menu-section h2 {
-            font-size: 1.6em;
-            color: #3498db;
+            font-family: 'Great Vibes', cursive, sans-serif; /* Consistent font for headings */
+            font-size: 2em; /* Larger heading font */
+            color: var(--medium-purple); /* Medium purple for headings */
             margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
+            border-bottom: 1px dashed var(--light-purple); /* Dashed light purple border */
+            padding-bottom: 8px;
+            letter-spacing: 1px; /* Slightly more spaced letters */
         }
         .menu-item {
-            font-size: 1.1em;
-            margin-bottom: 8px;
-            color: #555;
-            line-height: 1.4;
+            font-size: 1.3em; /* Larger menu item font */
+            margin-bottom: 10px;
+            color: var(--darkest-purple); /* Darkest purple for menu items */
+            line-height: 1.5;
+            font-weight: 400; /* Standard weight for readability */
         }
         .prompt {
-            color: #e74c3c;
+            color: var(--deep-purple); /* Use deep purple for prompts */
             font-weight: bold;
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #fde0dc;
-            border-radius: 5px;
+            margin-top: 15px;
+            padding: 12px;
+            background-color: var(--light-purple); /* Light purple background for prompt */
+            border-radius: 8px;
+            border: 1px solid var(--medium-purple); /* Medium purple border */
+            font-size: 1.1em; /* Slightly larger font for prompt */
         }
         /* Style for optional items */
         .optional {
             font-style: italic;
-            color: #7f8c8d;
+            color: var(--medium-purple); /* Medium purple for optional item text */
         }
     </style>
 </head>
@@ -97,6 +113,7 @@
             <div id="dessert-item" class="menu-item optional"></div>
         </div>
     </div>
+
     <script src="menuData.js"></script>
     <script src="script.js"></script>
 </body>
