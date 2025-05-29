@@ -2,7 +2,7 @@
 // You would manually populate this or use a script to convert your Excel to this format.
 const menuData = {
     breakfast: [
-        "Scrambled Eggs", "Oatmeal", "Pancakes", "Cereal", "Yogurt", "Smoothie", "Waffles", "Bagel", "Toast"
+        "Scrambled Eggs", "Dosa", "Pancakes", "Poha", "Seviyan", "Upma", "Guac/Cheese Toast", "", "Toast"
     ],
     lunch: [
         "Chicken Salad", "Turkey Sandwich", "Vegetable Soup", "Sushi", "Burger", "Quinoa Salad", "Steak and Potatoes", "Fish and Chips", "Pulled Pork Sandwich"
