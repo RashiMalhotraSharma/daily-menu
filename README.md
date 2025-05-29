@@ -1,2 +1,2 @@
 # daily-menu
-Daily menu for home
+First vibe coded application to generate a Daily menu for home
