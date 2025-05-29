@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px 40px;
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        #date-day {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        .menu-section {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .menu-section h2 {
+            font-size: 1.6em;
+            color: #3498db;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .menu-item {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            color: #555;
+            line-height: 1.4;
+        }
+        .prompt {
+            color: #e74c3c;
+            font-weight: bold;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fde0dc;
+            border-radius: 5px;
+        }
+        /* Style for optional items */
+        .optional {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="date-day"></div>
+
+        <div class="menu-section">
+            <h2>Breakfast</h2>
+            <div id="breakfast-item" class="menu-item">Loading...</div>
+        </div>
+
+        <div class="menu-section">
+            <h2>Lunch</h2>
+            <div id="lunch-item" class="menu-item">Loading...</div>
+        </div>
+
+        <div class="menu-section">
+            <h2>Dinner</h2>
+            <div id="dinner-item" class="menu-item">Loading...</div>
+        </div>
+
+        <div class="menu-section" id="snack-section">
+            <h2>Snack</h2>
+            <div id="snack-item" class="menu-item optional"></div>
+        </div>
+
+        <div class="menu-section" id="dessert-section">
+            <h2>Dessert</h2>
+            <div id="dessert-item" class="menu-item optional"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
