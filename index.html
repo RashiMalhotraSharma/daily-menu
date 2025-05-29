@@ -13,7 +13,7 @@
             --light-purple: #C18FD0;
             --very-light-purple: #EEDDFC;
             --darkest-purple: #4A005B;
-            --white: #FFFFFF; 
+            --white: #FFFFFF;
         }
 
         body {
@@ -29,7 +29,7 @@
             min-height: 100vh;
         }
         .container {
-            /* Removed background-color: #ffffff; */
+            /* Removed background-color: #ffffff; - it's implicitly white from body */
             border-radius: 15px; /* Slightly more rounded corners */
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Softer, more prominent shadow */
             padding: 35px 50px; /* More padding */
@@ -62,7 +62,7 @@
             letter-spacing: 1px; /* Slightly more spaced letters */
         }
         .menu-item {
-            font-size: 1.6em; /* Increased font size for menu items */
+            font-size: 1.8em; /* Increased font size for menu items */
             margin-bottom: 10px;
             color: var(--darkest-purple); /* Darkest purple for menu items */
             line-height: 1.5;
@@ -82,6 +82,42 @@
         .optional {
             font-style: italic;
             color: var(--medium-purple); /* Medium purple for optional item text */
+        }
+
+        /* Styles for the new buttons and hidden sections */
+        .show-options-buttons {
+            margin-top: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .show-options-buttons button {
+            background-color: var(--medium-purple);
+            color: var(--white); /* Changed to use --white variable */
+            font-family: 'Dancing Script', cursive, sans-serif;
+            font-size: 1.3em;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .show-options-buttons button:hover {
+            background-color: var(--deep-purple);
+            transform: translateY(-2px);
+        }
+
+        .show-options-buttons button:active {
+            transform: translateY(0);
+        }
+
+        /* Default hidden state for optional sections */
+        #snack-section-wrapper,
+        #dessert-section-wrapper {
+            display: none; /* Hide these sections by default */
         }
     </style>
 </head>
@@ -104,18 +140,25 @@
             <div id="dinner-item" class="menu-item">Loading...</div>
         </div>
 
-        <div class="menu-section" id="snack-section">
-            <h2>Snack</h2>
-            <div id="snack-item" class="menu-item optional"></div>
+        <div class="show-options-buttons">
+            <button id="show-snack-btn">Show Snack Option</button>
+            <button id="show-dessert-btn">Show Dessert Option</button>
         </div>
 
-        <div class="menu-section" id="dessert-section">
-            <h2>Dessert</h2>
-            <div id="dessert-item" class="menu-item optional"></div>
+        <div id="snack-section-wrapper">
+            <div class="menu-section" id="snack-section">
+                <h2>Snack</h2>
+                <div id="snack-item" class="menu-item optional"></div>
+            </div>
         </div>
-    </div>
 
-    <script src="menuData.js"></script>
+        <div id="dessert-section-wrapper">
+            <div class="menu-section" id="dessert-section">
+                <h2>Dessert</h2>
+                <div id="dessert-item" class="menu-item optional"></div>
+            </div>
+         </div>
+      </div> <script src="menuData.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
