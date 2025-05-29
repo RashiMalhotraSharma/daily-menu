@@ -10,6 +10,15 @@ const menuData = {
     dinner: [
         "Pasta", "Burger", "O Tacos", "Chowmein", "Repeat Lunch", "Order-In", "Chana Chaat", "Khichdi", "Pulao", "Jeera Aloo", "Tamarind Rice", "Pyaaz Tamatar", "Boondi sabzi"
     ],
+    easyBreakfast: [
+        "Scrambled Eggs", "Dosa", "Guac/Cheese Toast", "Idli"
+    ],
+    easyLunch: [
+        "Tamarind Rice", "Pyaaz Tamatar", "Boondi sabzi", "Khichdi", "Pulao"
+    ],
+    easyDinner: [
+        "O Tacos", "Repeat Lunch", "Order-In", "Khichdi", "Pulao", "Jeera Aloo", "Tamarind Rice", "Pyaaz Tamatar", "Boondi sabzi"
+    ],
     snack: [
         "Apple", "Mixed Nuts", "Snack Cucumbers", "Hummus with Carrots", "Popcorn", "Orange", "Banana"
     ],

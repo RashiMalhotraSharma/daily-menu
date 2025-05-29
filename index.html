@@ -29,7 +29,6 @@
             min-height: 100vh;
         }
         .container {
-            /* Removed background-color: #ffffff; - it's implicitly white from body */
             border-radius: 15px; /* Slightly more rounded corners */
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* Softer, more prominent shadow */
             padding: 35px 50px; /* More padding */
@@ -67,6 +66,14 @@
             color: var(--darkest-purple); /* Darkest purple for menu items */
             line-height: 1.5;
             font-weight: 400; /* Standard weight for readability */
+            display: flex; /* Allows button and text to sit side-by-side */
+            align-items: center; /* Vertically aligns items in the middle */
+            justify-content: space-between; /* Pushes button to the right, text to the left */
+            gap: 10px; /* Space between text and button */
+            flex-wrap: wrap; /* Allows items to wrap to next line if space is too small */
+        }
+        .menu-item span.item-text { /* New class to specifically style the menu item text */
+            flex-grow: 1; /* Allows the text to take up available space */
         }
         .prompt {
             color: var(--deep-purple); /* Use deep purple for prompts */
@@ -84,7 +91,7 @@
             color: var(--medium-purple); /* Medium purple for optional item text */
         }
 
-        /* Styles for the new buttons and hidden sections */
+        /* Styles for the new "Show Optional" buttons */
         .show-options-buttons {
             margin-top: 30px;
             margin-bottom: 20px;
@@ -93,7 +100,7 @@
 
         .show-options-buttons button {
             background-color: var(--medium-purple);
-            color: var(--white); /* Changed to use --white variable */
+            color: var(--white);
             font-family: 'Dancing Script', cursive, sans-serif;
             font-size: 1.3em;
             padding: 10px 20px;
@@ -114,6 +121,31 @@
             transform: translateY(0);
         }
 
+        /* Styles for the new "Easy Option" buttons */
+        .menu-item .easy-option-button {
+            flex-shrink: 0; /* Prevents button from shrinking */
+        }
+        .menu-item .easy-option-button button { /* Targeting the button specifically inside menu-item */
+            background-color: var(--light-purple); /* Lighter purple for easy option */
+            color: var(--darkest-purple); /* Dark text for contrast */
+            font-family: 'Dancing Script', cursive, sans-serif;
+            font-size: 0.7em; /* Even smaller font size relative to menu item */
+            padding: 5px 10px; /* Smaller padding */
+            border: 1px solid var(--medium-purple); /* Border to define it */
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            white-space: nowrap; /* Prevent text wrap */
+        }
+        .menu-item .easy-option-button button:hover {
+            background-color: var(--medium-purple);
+            color: var(--white);
+            transform: translateY(-1px);
+        }
+        .menu-item .easy-option-button button:active {
+            transform: translateY(0);
+        }
+
         /* Default hidden state for optional sections */
         #snack-section-wrapper,
         #dessert-section-wrapper {
@@ -127,17 +159,26 @@
 
         <div class="menu-section">
             <h2>Breakfast</h2>
-            <div id="breakfast-item" class="menu-item">Loading...</div>
+            <div id="breakfast-item" class="menu-item">
+                <span id="breakfast-text" class="item-text">Loading...</span> <div class="easy-option-button">
+                    <button id="easy-breakfast-btn">Give me a quick Breakfast option</button> </div>
+            </div>
         </div>
 
         <div class="menu-section">
             <h2>Lunch</h2>
-            <div id="lunch-item" class="menu-item">Loading...</div>
+            <div id="lunch-item" class="menu-item">
+                <span id="lunch-text" class="item-text">Loading...</span> <div class="easy-option-button">
+                    <button id="easy-lunch-btn">I need an easier lunch option today</button> </div>
+            </div>
         </div>
 
         <div class="menu-section">
             <h2>Dinner</h2>
-            <div id="dinner-item" class="menu-item">Loading...</div>
+            <div id="dinner-item" class="menu-item">
+                <span id="dinner-text" class="item-text">Loading...</span> <div class="easy-option-button">
+                    <button id="easy-dinner-btn">Too tired for this, what else?</button> </div>
+            </div>
         </div>
 
         <div class="show-options-buttons">
@@ -158,7 +199,8 @@
                 <div id="dessert-item" class="menu-item optional"></div>
             </div>
          </div>
-      </div> <script src="menuData.js"></script>
+      </div>
+    <script src="menuData.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
