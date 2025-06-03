@@ -22,15 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const easyLunchBtn = document.getElementById('easy-lunch-btn');
     const easyDinnerBtn = document.getElementById('easy-dinner-btn');
 
-    // --- Global variable to hold the current day's menu ---
-    // This will be loaded from localStorage or freshly generated
+    // --- Global variable to hold the current day's menu and its state ---
     let currentDailyMenu = {
         date: null,
         breakfast: null,
         lunch: null,
         dinner: null,
-        snack: null, // Will be set if snack is chosen
-        dessert: null // Will be set if dessert is chosen
+        snack: null,
+        dessert: null,
+        breakfastEasyUsed: false, // Flag to indicate if easy option was picked for breakfast
+        lunchEasyUsed: false,
+        dinnerEasyUsed: false,
+        snackShown: false,      // Flag to indicate if snack section was made visible
+        dessertShown: false     // Flag to indicate if dessert section was made visible
     };
 
 
@@ -55,10 +59,14 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const storedData = localStorage.getItem('dailyMenu_data');
             if (storedData) {
-                return JSON.parse(storedData);
+                const loaded = JSON.parse(storedData);
+                // Basic validation: ensure it has expected properties to prevent errors from old/corrupt data
+                if (loaded && loaded.date && loaded.breakfast !== undefined) { // Check for a core property
+                    return loaded;
+                }
             }
         } catch (e) {
-            console.error("Failed to load menu from localStorage:", e);
+            console.error("Failed to load/parse menu from localStorage:", e);
         }
         return null;
     }
@@ -74,6 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
      * @returns {string} The randomly selected menu item.
      */
     function getRandomMenuItem(items, mealTypeKey) {
+        if (!items || items.length === 0) {
+            return "No options available"; // Fallback text if array is empty
+        }
+
         let previouslyDisplayed = JSON.parse(localStorage.getItem('displayedMenus')) || {};
         previouslyDisplayed[mealTypeKey] = previouslyDisplayed[mealTypeKey] || [];
 
@@ -124,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Remove any existing prompt before adding a new one
         const parentSection = itemTextElement.closest('.menu-section');
-        const existingPrompt = parentSection.querySelector('.prompt');
+        const existingPrompt = parentSection ? parentSection.querySelector('.prompt') : null;
         if (existingPrompt) {
             existingPrompt.remove();
         }
@@ -134,109 +146,143 @@ document.addEventListener('DOMContentLoaded', () => {
             const promptDiv = document.createElement('div');
             promptDiv.classList.add('prompt');
             promptDiv.textContent = `Please add more ${sourceType} items to your list! (Currently ${items.length} options)`;
-            parentSection.appendChild(promptDiv);
+            if (parentSection) { // Ensure parentSection exists before appending
+                parentSection.appendChild(promptDiv);
+            }
         }
 
-        // Hide the button if provided
+        // Hide the button if provided and update currentDailyMenu state flag
         if (buttonToHide) {
             buttonToHide.style.display = 'none';
+            if (mealType === 'breakfast') currentDailyMenu.breakfastEasyUsed = true;
+            if (mealType === 'lunch') currentDailyMenu.lunchEasyUsed = true;
+            if (mealType === 'dinner') currentDailyMenu.dinnerEasyUsed = true;
         }
 
-        saveDailyMenuToLocalStorage(); // Save changes to localStorage
+        // Special handling for snack/dessert visibility and their flags
+        if (mealType === 'snack' && snackSectionWrapper) {
+            snackSectionWrapper.style.display = 'block';
+            currentDailyMenu.snackShown = true;
+            if (showSnackBtn) showSnackBtn.style.display = 'none'; // Ensure optional button hides
+        }
+        if (mealType === 'dessert' && dessertSectionWrapper) {
+            dessertSectionWrapper.style.display = 'block';
+            currentDailyMenu.dessertShown = true;
+            if (showDessertBtn) showDessertBtn.style.display = 'none'; // Ensure optional button hides
+        }
+
+        saveDailyMenuToLocalStorage(); // Save all changes to localStorage
     }
 
     /**
-     * Updates the UI based on the items stored in currentDailyMenu.
+     * Updates the UI based on the items and flags stored in currentDailyMenu.
      * Used on initial load to restore the state.
      */
     function updateUIFromStoredMenu() {
         // Main meals
         if (currentDailyMenu.breakfast) {
             breakfastItemTextElement.textContent = currentDailyMenu.breakfast;
-            // Hide the easy button if a specific easy option was initially loaded
-            if (currentDailyMenu.breakfast === menuData.easyBreakfast[0] || currentDailyMenu.breakfast === menuData.easyBreakfast[1] || currentDailyMenu.breakfast === menuData.easyBreakfast[2] || currentDailyMenu.breakfast === menuData.easyBreakfast[3]) { // Simple check, could be improved
+            if (currentDailyMenu.breakfastEasyUsed && easyBreakfastBtn) {
                 easyBreakfastBtn.style.display = 'none';
             }
         }
         if (currentDailyMenu.lunch) {
             lunchItemTextElement.textContent = currentDailyMenu.lunch;
-            if (currentDailyMenu.lunch === menuData.easyLunch[0] || currentDailyMenu.lunch === menuData.easyLunch[1] || currentDailyMenu.lunch === menuData.easyLunch[2] || currentDailyMenu.lunch === menuData.easyLunch[3]) {
+            if (currentDailyMenu.lunchEasyUsed && easyLunchBtn) {
                 easyLunchBtn.style.display = 'none';
             }
         }
         if (currentDailyMenu.dinner) {
             dinnerItemTextElement.textContent = currentDailyMenu.dinner;
-            if (currentDailyMenu.dinner === menuData.easyDinner[0] || currentDailyMenu.dinner === menuData.easyDinner[1] || currentDailyMenu.dinner === menuData.easyDinner[2] || currentDailyMenu.dinner === menuData.easyDinner[3]) {
+            if (currentDailyMenu.dinnerEasyUsed && easyDinnerBtn) {
                 easyDinnerBtn.style.display = 'none';
             }
         }
 
         // Optional meals (Snack & Dessert)
-        if (currentDailyMenu.snack) {
-            snackItemElement.textContent = currentDailyMenu.snack;
-            snackSectionWrapper.style.display = 'block';
-            showSnackBtn.style.display = 'none';
+        if (currentDailyMenu.snackShown) {
+            snackItemElement.textContent = currentDailyMenu.snack || "No snack chosen."; // Display stored snack or a message
+            if (snackSectionWrapper) snackSectionWrapper.style.display = 'block';
+            if (showSnackBtn) showSnackBtn.style.display = 'none';
         }
-        if (currentDailyMenu.dessert) {
-            dessertItemElement.textContent = currentDailyMenu.dessert;
-            dessertSectionWrapper.style.display = 'block';
-            showDessertBtn.style.display = 'none';
+        if (currentDailyMenu.dessertShown) {
+            dessertItemElement.textContent = currentDailyMenu.dessert || "No dessert chosen."; // Display stored dessert or a message
+            if (dessertSectionWrapper) dessertSectionWrapper.style.display = 'block';
+            if (showDessertBtn) showDessertBtn.style.display = 'none';
         }
     }
 
 
     // --- Initial Load Logic ---
 
-    // Get today's date string for comparison (e.g., "Tuesday, June 3, 2025")
+    // Get today's date for comparison
+    const today = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const todayDateString = today.toLocaleDateString('en-US', options);
-    dateDayElement.textContent = todayDateString; // Always display current date
+
+    // Display current date immediately
+    dateDayElement.textContent = todayDateString;
 
     const loadedMenu = loadDailyMenuFromLocalStorage();
 
     if (loadedMenu && loadedMenu.date === todayDateString) {
         // If a menu exists for today, load it
-        currentDailyMenu = loadedMenu;
+        currentDailyMenu = { ...currentDailyMenu, ...loadedMenu }; // Merge to ensure all flags are present
         updateUIFromStoredMenu();
-        console.log("Loaded menu for today:", currentDailyMenu);
+        console.log("Loaded menu for today:", currentDailyMenu); // Use console.log for debugging on desktop
     } else {
         // If it's a new day or no menu found, generate a fresh one
-        console.log("Generating new menu for today.");
+        console.log("New day or no menu found. Generating new menu."); // Use console.log
         currentDailyMenu.date = todayDateString;
+        // Reset all flags for a new day
+        currentDailyMenu.breakfastEasyUsed = false;
+        currentDailyMenu.lunchEasyUsed = false;
+        currentDailyMenu.dinnerEasyUsed = false;
+        currentDailyMenu.snackShown = false;
+        currentDailyMenu.dessertShown = false;
+
+        // Generate initial main meals
         generateAndDisplayMeal('breakfast', breakfastItemTextElement);
         generateAndDisplayMeal('lunch', lunchItemTextElement);
         generateAndDisplayMeal('dinner', dinnerItemTextElement);
-        // Snack and dessert are null by default, will be generated by buttons
+        // Snack and dessert are null by default and sections hidden, will be generated by buttons
     }
 
 
     // --- Event Listeners for Buttons ---
 
     // Easy Option Buttons
-    easyBreakfastBtn.addEventListener('click', () => {
-        generateAndDisplayMeal('breakfast', breakfastItemTextElement, 'easyBreakfast', easyBreakfastBtn);
-    });
+    if (easyBreakfastBtn) {
+        easyBreakfastBtn.addEventListener('click', () => {
+            generateAndDisplayMeal('breakfast', breakfastItemTextElement, 'easyBreakfast', easyBreakfastBtn);
+        });
+    }
 
-    easyLunchBtn.addEventListener('click', () => {
-        generateAndDisplayMeal('lunch', lunchItemTextElement, 'easyLunch', easyLunchBtn);
-    });
+    if (easyLunchBtn) {
+        easyLunchBtn.addEventListener('click', () => {
+            generateAndDisplayMeal('lunch', lunchItemTextElement, 'easyLunch', easyLunchBtn);
+        });
+    }
 
-    easyDinnerBtn.addEventListener('click', () => {
-        generateAndDisplayMeal('dinner', dinnerItemTextElement, 'easyDinner', easyDinnerBtn);
-    });
+    if (easyDinnerBtn) {
+        easyDinnerBtn.addEventListener('click', () => {
+            generateAndDisplayMeal('dinner', dinnerItemTextElement, 'easyDinner', easyDinnerBtn);
+        });
+    }
 
 
     // Show Optional Buttons (Snack and Dessert)
-    showSnackBtn.addEventListener('click', () => {
-        // First, make the section visible
-        snackSectionWrapper.style.display = 'block';
-        // Then generate and display the meal, updating the stored menu and hiding button
-        generateAndDisplayMeal('snack', snackItemElement, 'snack', showSnackBtn);
-    });
+    if (showSnackBtn) {
+        showSnackBtn.addEventListener('click', () => {
+            // generateAndDisplayMeal now handles showing the section and hiding the button itself
+            generateAndDisplayMeal('snack', snackItemElement, 'snack', showSnackBtn);
+        });
+    }
 
-    showDessertBtn.addEventListener('click', () => {
-        // First, make the section visible
-        dessertSectionWrapper.style.display = 'block';
-        // Then generate and display the meal, updating the stored menu and hiding button
-        generateAndDisplayMeal('dessert', dessertItemElement, 'dessert', showDessertBtn);
-    });
+    if (showDessertBtn) {
+        showDessertBtn.addEventListener('click', () => {
+            // generateAndDisplayMeal now handles showing the section and hiding the button itself
+            generateAndDisplayMeal('dessert', dessertItemElement, 'dessert', showDessertBtn);
+        });
+    }
 });
