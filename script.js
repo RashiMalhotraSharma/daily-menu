@@ -5,7 +5,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Get references to HTML elements
     const dateDayElement = document.getElementById('date-day');
-    // Adjusted to get the specific <span> element for the item text
     const breakfastItemTextElement = document.getElementById('breakfast-text');
     const lunchItemTextElement = document.getElementById('lunch-text');
     const dinnerItemTextElement = document.getElementById('dinner-text');
@@ -19,33 +18,69 @@ document.addEventListener('DOMContentLoaded', () => {
     const showSnackBtn = document.getElementById('show-snack-btn');
     const showDessertBtn = document.getElementById('show-dessert-btn');
 
-    // References to the easy option buttons
     const easyBreakfastBtn = document.getElementById('easy-breakfast-btn');
     const easyLunchBtn = document.getElementById('easy-lunch-btn');
     const easyDinnerBtn = document.getElementById('easy-dinner-btn');
 
+    // --- Global variable to hold the current day's menu ---
+    // This will be loaded from localStorage or freshly generated
+    let currentDailyMenu = {
+        date: null,
+        breakfast: null,
+        lunch: null,
+        dinner: null,
+        snack: null, // Will be set if snack is chosen
+        dessert: null // Will be set if dessert is chosen
+    };
 
-    // --- Display Date and Day ---
-    const today = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    dateDayElement.textContent = today.toLocaleDateString('en-US', options);
 
-    // --- Menu Logic ---
+    // --- Helper Functions for LocalStorage ---
+
+    /**
+     * Saves the currentDailyMenu object to localStorage.
+     */
+    function saveDailyMenuToLocalStorage() {
+        try {
+            localStorage.setItem('dailyMenu_data', JSON.stringify(currentDailyMenu));
+        } catch (e) {
+            console.error("Failed to save menu to localStorage:", e);
+        }
+    }
+
+    /**
+     * Loads the daily menu data from localStorage.
+     * @returns {object|null} The parsed menu data or null if not found/invalid.
+     */
+    function loadDailyMenuFromLocalStorage() {
+        try {
+            const storedData = localStorage.getItem('dailyMenu_data');
+            if (storedData) {
+                return JSON.parse(storedData);
+            }
+        } catch (e) {
+            console.error("Failed to load menu from localStorage:", e);
+        }
+        return null;
+    }
+
+
+    // --- Core Menu Generation/Display Logic ---
 
     /**
      * Gets a random menu item from a list, ensuring it hasn't been displayed in the last week.
+     * Updates and saves the display history in localStorage.
      * @param {Array<string>} items - The array of menu items to choose from.
-     * @param {string} mealType - The type of meal (e.g., 'breakfast', 'easyBreakfast') for localStorage tracking.
+     * @param {string} mealTypeKey - The key used for localStorage history (e.g., 'breakfast', 'easyBreakfast').
      * @returns {string} The randomly selected menu item.
      */
-    function getRandomMenuItem(items, mealType) {
+    function getRandomMenuItem(items, mealTypeKey) {
         let previouslyDisplayed = JSON.parse(localStorage.getItem('displayedMenus')) || {};
-        previouslyDisplayed[mealType] = previouslyDisplayed[mealType] || [];
+        previouslyDisplayed[mealTypeKey] = previouslyDisplayed[mealTypeKey] || [];
 
         const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
 
         let validCandidates = items.filter(item => {
-            const lastDisplayed = previouslyDisplayed[mealType].find(entry => entry.item === item);
+            const lastDisplayed = previouslyDisplayed[mealTypeKey].find(entry => entry.item === item);
             return !lastDisplayed || lastDisplayed.timestamp < oneWeekAgo;
         });
 
@@ -54,105 +89,154 @@ document.addEventListener('DOMContentLoaded', () => {
         if (validCandidates.length > 0) {
             selectedItem = validCandidates[Math.floor(Math.random() * validCandidates.length)];
         } else {
-            console.warn(`All ${mealType} items displayed recently. Resetting history for ${mealType}.`);
-            previouslyDisplayed[mealType] = [];
-            selectedItem = items[Math.floor(Math.random() * items.length)];
+            console.warn(`All ${mealTypeKey} items displayed recently. Resetting history for ${mealTypeKey}.`);
+            previouslyDisplayed[mealTypeKey] = []; // Clear history for this meal type
+            selectedItem = items[Math.floor(Math.random() * items.length)]; // Pick from all original items
         }
 
-        previouslyDisplayed[mealType] = previouslyDisplayed[mealType].filter(entry => entry.timestamp >= oneWeekAgo);
-        previouslyDisplayed[mealType].push({ item: selectedItem, timestamp: Date.now() });
+        // Update previously displayed items in localStorage: keep only recent, add new
+        previouslyDisplayed[mealTypeKey] = previouslyDisplayed[mealTypeKey].filter(entry => entry.timestamp >= oneWeekAgo);
+        previouslyDisplayed[mealTypeKey].push({ item: selectedItem, timestamp: Date.now() });
         localStorage.setItem('displayedMenus', JSON.stringify(previouslyDisplayed));
 
         return selectedItem;
     }
 
     /**
-     * Displays a menu item for a given meal type and shows a prompt if options are limited.
-     * @param {string} mealType - The type of meal (e.g., 'breakfast').
-     * @param {HTMLElement} element - The HTML element where the item name should be displayed (now typically a <span>).
-     * @param {string} [sourceType=mealType] - Optional: The specific source list to use (e.g., 'easyBreakfast').
+     * Generates a menu item for a specific meal, updates the UI, updates currentDailyMenu,
+     * and displays prompts if the options list is short.
+     * @param {string} mealType - The meal type ('breakfast', 'lunch', 'dinner', 'snack', 'dessert').
+     * @param {HTMLElement} itemTextElement - The HTML element where the item text is displayed.
+     * @param {string} [sourceType=mealType] - The key for the menuData list (e.g., 'easyBreakfast').
+     * @param {HTMLElement} [buttonToHide=null] - Optional button to hide after item is generated.
      */
-    function displayMenuAndCheckCount(mealType, element, sourceType = mealType) {
+    function generateAndDisplayMeal(mealType, itemTextElement, sourceType = mealType, buttonToHide = null) {
         const items = menuData[sourceType];
 
         if (!items || items.length === 0) {
-            element.textContent = `No ${sourceType} items available.`;
-            return;
+            itemTextElement.textContent = `No ${sourceType} items available.`;
+            currentDailyMenu[mealType] = null; // Mark as no item chosen
+        } else {
+            const item = getRandomMenuItem(items, sourceType);
+            itemTextElement.textContent = item;
+            currentDailyMenu[mealType] = item; // Store the chosen item in our daily menu object
         }
 
-        const item = getRandomMenuItem(items, sourceType);
-        element.textContent = item; // Update the text content of the span
-
-        // Remove any existing prompt. The prompt is sibling to the .menu-item div
-        const parentSection = element.closest('.menu-section'); // Find the closest parent .menu-section
+        // Remove any existing prompt before adding a new one
+        const parentSection = itemTextElement.closest('.menu-section');
         const existingPrompt = parentSection.querySelector('.prompt');
         if (existingPrompt) {
             existingPrompt.remove();
         }
 
-        // Display a prompt if less than 7 options are available
-        if (items.length < 7) {
+        // Display a prompt if less than 7 options are available for the *sourceType*
+        if (items && items.length < 7) {
             const promptDiv = document.createElement('div');
             promptDiv.classList.add('prompt');
             promptDiv.textContent = `Please add more ${sourceType} items to your list! (Currently ${items.length} options)`;
-            // Append the prompt to the parent section, after the menu-item div
             parentSection.appendChild(promptDiv);
+        }
+
+        // Hide the button if provided
+        if (buttonToHide) {
+            buttonToHide.style.display = 'none';
+        }
+
+        saveDailyMenuToLocalStorage(); // Save changes to localStorage
+    }
+
+    /**
+     * Updates the UI based on the items stored in currentDailyMenu.
+     * Used on initial load to restore the state.
+     */
+    function updateUIFromStoredMenu() {
+        // Main meals
+        if (currentDailyMenu.breakfast) {
+            breakfastItemTextElement.textContent = currentDailyMenu.breakfast;
+            // Hide the easy button if a specific easy option was initially loaded
+            if (currentDailyMenu.breakfast === menuData.easyBreakfast[0] || currentDailyMenu.breakfast === menuData.easyBreakfast[1] || currentDailyMenu.breakfast === menuData.easyBreakfast[2] || currentDailyMenu.breakfast === menuData.easyBreakfast[3]) { // Simple check, could be improved
+                easyBreakfastBtn.style.display = 'none';
+            }
+        }
+        if (currentDailyMenu.lunch) {
+            lunchItemTextElement.textContent = currentDailyMenu.lunch;
+            if (currentDailyMenu.lunch === menuData.easyLunch[0] || currentDailyMenu.lunch === menuData.easyLunch[1] || currentDailyMenu.lunch === menuData.easyLunch[2] || currentDailyMenu.lunch === menuData.easyLunch[3]) {
+                easyLunchBtn.style.display = 'none';
+            }
+        }
+        if (currentDailyMenu.dinner) {
+            dinnerItemTextElement.textContent = currentDailyMenu.dinner;
+            if (currentDailyMenu.dinner === menuData.easyDinner[0] || currentDailyMenu.dinner === menuData.easyDinner[1] || currentDailyMenu.dinner === menuData.easyDinner[2] || currentDailyMenu.dinner === menuData.easyDinner[3]) {
+                easyDinnerBtn.style.display = 'none';
+            }
+        }
+
+        // Optional meals (Snack & Dessert)
+        if (currentDailyMenu.snack) {
+            snackItemElement.textContent = currentDailyMenu.snack;
+            snackSectionWrapper.style.display = 'block';
+            showSnackBtn.style.display = 'none';
+        }
+        if (currentDailyMenu.dessert) {
+            dessertItemElement.textContent = currentDailyMenu.dessert;
+            dessertSectionWrapper.style.display = 'block';
+            showDessertBtn.style.display = 'none';
         }
     }
 
-    // --- Initial Load: Display only Breakfast, Lunch, Dinner ---
-    // Ensure we pass the correct text element for each meal
-    displayMenuAndCheckCount('breakfast', breakfastItemTextElement);
-    displayMenuAndCheckCount('lunch', lunchItemTextElement);
-    displayMenuAndCheckCount('dinner', dinnerItemTextElement);
+
+    // --- Initial Load Logic ---
+
+    // Get today's date string for comparison (e.g., "Tuesday, June 3, 2025")
+    const todayDateString = today.toLocaleDateString('en-US', options);
+    dateDayElement.textContent = todayDateString; // Always display current date
+
+    const loadedMenu = loadDailyMenuFromLocalStorage();
+
+    if (loadedMenu && loadedMenu.date === todayDateString) {
+        // If a menu exists for today, load it
+        currentDailyMenu = loadedMenu;
+        updateUIFromStoredMenu();
+        console.log("Loaded menu for today:", currentDailyMenu);
+    } else {
+        // If it's a new day or no menu found, generate a fresh one
+        console.log("Generating new menu for today.");
+        currentDailyMenu.date = todayDateString;
+        generateAndDisplayMeal('breakfast', breakfastItemTextElement);
+        generateAndDisplayMeal('lunch', lunchItemTextElement);
+        generateAndDisplayMeal('dinner', dinnerItemTextElement);
+        // Snack and dessert are null by default, will be generated by buttons
+    }
 
 
-    // --- Event Listeners for "Easy Option" Buttons ---
+    // --- Event Listeners for Buttons ---
 
+    // Easy Option Buttons
     easyBreakfastBtn.addEventListener('click', () => {
-        displayMenuAndCheckCount('breakfast', breakfastItemTextElement, 'easyBreakfast');
-        easyBreakfastBtn.style.display = 'none'; // Hide the button after use
+        generateAndDisplayMeal('breakfast', breakfastItemTextElement, 'easyBreakfast', easyBreakfastBtn);
     });
 
     easyLunchBtn.addEventListener('click', () => {
-        displayMenuAndCheckCount('lunch', lunchItemTextElement, 'easyLunch');
-        easyLunchBtn.style.display = 'none'; // Hide the button after use
+        generateAndDisplayMeal('lunch', lunchItemTextElement, 'easyLunch', easyLunchBtn);
     });
 
     easyDinnerBtn.addEventListener('click', () => {
-        displayMenuAndCheckCount('dinner', dinnerItemTextElement, 'easyDinner');
-        easyDinnerBtn.style.display = 'none'; // Hide the button after use
+        generateAndDisplayMeal('dinner', dinnerItemTextElement, 'easyDinner', easyDinnerBtn);
     });
 
 
-    // --- Event Listeners for "Show Optional" Buttons (Snack and Dessert) ---
-
-    /**
-     * Handles the display of an optional meal section when its button is clicked.
-     * @param {string} mealType - The type of meal (e.g., 'snack', 'dessert').
-     * @param {HTMLElement} itemElement - The HTML element where the item name will be displayed.
-     * @param {HTMLElement} sectionWrapper - The parent div wrapping the meal section.
-     * @param {HTMLElement} buttonElement - The button that triggers showing this section.
-     */
-    function showOptionalMeal(mealType, itemElement, sectionWrapper, buttonElement) {
-        if (menuData[mealType] && menuData[mealType].length > 0) {
-            displayMenuAndCheckCount(mealType, itemElement); // Generate and display the item
-            sectionWrapper.style.display = 'block'; // Make the section visible
-            buttonElement.style.display = 'none'; // Hide the button after showing the section
-        } else {
-            itemElement.textContent = `No ${mealType} items available.`;
-            sectionWrapper.style.display = 'block';
-            buttonElement.style.display = 'none';
-        }
-    }
-
-    // Add event listener for the "Show Snack Option" button
+    // Show Optional Buttons (Snack and Dessert)
     showSnackBtn.addEventListener('click', () => {
-        showOptionalMeal('snack', snackItemElement, snackSectionWrapper, showSnackBtn);
+        // First, make the section visible
+        snackSectionWrapper.style.display = 'block';
+        // Then generate and display the meal, updating the stored menu and hiding button
+        generateAndDisplayMeal('snack', snackItemElement, 'snack', showSnackBtn);
     });
 
-    // Add event listener for the "Show Dessert Option" button
     showDessertBtn.addEventListener('click', () => {
-        showOptionalMeal('dessert', dessertItemElement, dessertSectionWrapper, showDessertBtn);
+        // First, make the section visible
+        dessertSectionWrapper.style.display = 'block';
+        // Then generate and display the meal, updating the stored menu and hiding button
+        generateAndDisplayMeal('dessert', dessertItemElement, 'dessert', showDessertBtn);
     });
 });
